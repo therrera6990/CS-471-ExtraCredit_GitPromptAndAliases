@@ -1,26 +1,27 @@
 # Git Prompt and Aliases
 
 ## Author
+
 Thomas Herrera
 
 ## Overview
 
-This project customizes my **Bash terminal prompt** to display useful Git information and creates several **Git aliases** for commonly used commands.
+This project customizes my **Bash terminal prompt** to display useful Git information and adds several **Git aliases** for commonly used commands.
 
 The customized prompt displays:
 
 - Current working directory
 - Current Git branch
-- Modified or staged file indicator
-- Untracked file indicator
+- Modified file status
+- Untracked file status
 - Remote tracking branch
-- Number of commits ahead or behind the remote branch
+- Ahead or behind status from the remote branch
 
-The project also includes three Git aliases:
+The aliases used in this project include:
 
-- **git gs** – Git status
-- **git gd** – Git diff
-- **git gl** – Git log with graph
+- `gs` – Git status
+- `gd` – Git diff
+- `gg` – Git history
 
 ---
 
@@ -36,15 +37,13 @@ The project also includes three Git aliases:
 
 Before making any modifications, my terminal used the default Onyx Bash prompt.
 
-Example:
-
 ```text
 [thomasherrera@onyx CS-471-ExtraCredit_GitPromptAndAliases]$
 ```
 
-**Screenshot**
+### Screenshot
 
-Add original terminal screenshot here.
+![Before Customization](screenshots/before.png)
 
 ---
 
@@ -56,55 +55,31 @@ The Bash prompt was customized by modifying:
 ~/.bashrc
 ```
 
-The following code was added to the bottom of the `.bashrc` file:
+The following Git prompt settings were added:
 
 ```bash
-# CS471 Git prompt customization
+# ========================================
+# CS471 Git aliases
+# ========================================
 
-parse_git_branch() {
-    git branch 2>/dev/null | sed -n '/^\*/s/^\* //p'
-}
+alias gs='git status'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gg='git customLog1'
+alias ggb='git log --oneline --decorate --graph --all'
 
-git_status_symbols() {
-    local symbols=""
+# ==============================================
+# Enhance the Git Prompt with Git information
+# ==============================================
 
-    if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
-        symbols="${symbols}*"
-    fi
-
-    if [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
-        symbols="${symbols}%"
-    fi
-
-    echo "$symbols"
-}
-
-git_remote_status() {
-    local branch
-    local upstream
-    local behind
-    local ahead
-
-    branch=$(git symbolic-ref --short HEAD 2>/dev/null) || return
-    upstream=$(git rev-parse --abbrev-ref "@{upstream}" 2>/dev/null) || return
-
-    read behind ahead <<< "$(git rev-list --left-right --count "$upstream...HEAD" 2>/dev/null)"
-
-    if [ "$ahead" -gt 0 ]; then
-        echo -n " +$ahead"
-    fi
-
-    if [ "$behind" -gt 0 ]; then
-        echo -n " -$behind"
-    fi
-
-    echo -n " $upstream"
-}
-
-PS1='\n\[\e[33m\]\w\[\e[0m\] \[\e[36m\]($(parse_git_branch) $(git_status_symbols)$(git_remote_status))\[\e[0m\]\n$ '
+GIT_PS1_SHOWDIRTYSTATE=true
+GIT_PS1_SHOWUNTRACKEDFILES=true
+GIT_PS1_SHOWSTASHSTATE=true
+GIT_PS1_SHOWUPSTREAM="verbose name"
+GIT_PS1_SHOWCOLORHINTS=true
 ```
 
-After saving the file, the configuration was reloaded using:
+After saving the file, the Bash configuration was reloaded using:
 
 ```bash
 source ~/.bashrc
@@ -114,7 +89,9 @@ source ~/.bashrc
 
 ## Customized Prompt
 
-Example customized prompt:
+The customized prompt displays Git information directly in the terminal.
+
+Example:
 
 ```text
 ~/CS-471-ExtraCredit_GitPromptAndAliases (main * origin/main)
@@ -124,129 +101,100 @@ $
 where:
 
 - `main` = current Git branch
-- `*` = modified or staged files exist
-- `%` = untracked files exist
-- `origin/main` = remote tracking branch
-- `+1` = one commit ahead of remote, if applicable
-- `-1` = one commit behind remote, if applicable
-
-The prompt also includes a blank line before the next command prompt.
-
-**Screenshot**
-
-Add customized terminal screenshot here.
+- `*` = unstaged changes
+- `+` = staged changes
+- `%` = untracked files
+- `$` = stashed changes
+- `>` = local branch is ahead of remote
+- `<` = local branch is behind remote
+- `=` = local branch matches the remote branch
 
 ---
 
 ## Git Aliases
 
-Three Git aliases were created using `git config --global`.
+### 1. `gs` - Git Status
 
-### git gs
-
-**Command**
-
-```bash
-git config --global alias.gs status
-```
-
-**Usage**
-
-```bash
-git gs
-```
-
-Equivalent command:
+The `gs` alias runs:
 
 ```bash
 git status
 ```
 
-**Output**
+Usage:
 
-```text
-On branch main
-Your branch is up to date with 'origin/main'.
-
-Changes not staged for commit:
-  modified: README.md
+```bash
+gs
 ```
+
+### Screenshot
+
+![gs Git Status](screenshots/git-gs.png)
 
 ---
 
-### git gd
+### 2. `gd` - Git Diff
 
-**Command**
-
-```bash
-git config --global alias.gd diff
-```
-
-**Usage**
-
-```bash
-git gd
-```
-
-Equivalent command:
+The `gd` alias runs:
 
 ```bash
 git diff
 ```
 
-**Output**
+Usage:
 
-```text
-diff --git a/README.md b/README.md
---- a/README.md
-+++ b/README.md
+```bash
+gd
 ```
+
+### Screenshot
+
+![gd Git Diff](screenshots/git-gd.png)
 
 ---
 
-### git gl
+### 3. `gg` - Git History
 
-**Command**
+The `gg` alias runs my custom Git log command.
 
-```bash
-git config --global alias.gl "log --oneline --decorate --graph --all"
-```
-
-**Usage**
+Usage:
 
 ```bash
-git gl
+gg
 ```
 
-Equivalent command:
+The custom Git log alias was created using:
 
 ```bash
-git log --oneline --decorate --graph --all
+git config --global alias.customLog1 "log --oneline --graph --all --pretty=format:'%C(yellow)%h%C(auto)%d%C(white) %s%C(green) (%cr) %C(bold blue)%an <%ae>%C(reset)'"
 ```
 
-**Output**
+### Screenshot
 
-```text
-* 1188b7d (HEAD -> main, origin/main, origin/HEAD) Initial commit
-```
+![gg Git History](screenshots/git-gg.png)
 
 ---
 
 ## Alias Verification
 
-The aliases can be verified using:
+I verified the Git aliases using:
 
 ```bash
 git config --global --get-regexp '^alias\.'
 ```
 
-**Output**
+Example output:
 
 ```text
 alias.gs status
 alias.gd diff
 alias.gl log --oneline --decorate --graph --all
+alias.customLog1 log --oneline --graph --all
 ```
+
+### Screenshot
+
+![Git Alias Configuration](screenshots/git-aliases.png)
 
 ---
 
@@ -254,29 +202,9 @@ alias.gl log --oneline --decorate --graph --all
 
 | Alias | Command | Purpose |
 |:------|:--------|:--------|
-| `git gs` | `git status` | Shows repository status |
-| `git gd` | `git diff` | Shows file changes |
-| `git gl` | `git log --oneline --decorate --graph --all` | Shows Git history |
-
----
-
-## Screenshots
-
-### Before Customization
-
-Add screenshot of the original terminal here.
-
-### After Customization
-
-Add screenshot showing the customized Bash prompt here.
-
-### Git Aliases
-
-Add screenshots showing:
-
-- `git gs`
-- `git gd`
-- `git gl`
+| `gs` | `git status` | Shows repository status |
+| `gd` | `git diff` | Shows file changes |
+| `gg` | `git customLog1` | Shows Git history |
 
 ---
 
@@ -285,16 +213,16 @@ Add screenshots showing:
 - Git documentation
 - Bash documentation
 - CS471 assignment README
-- ChatGPT for help with Understanding what the extra credit assignment wanted me to do and troubleshooting with some of the syntax errors I was running into with .bashrc
+- Examples provided by the professor
+- ChatGPT for help understanding the assignment and troubleshooting `.bashrc` syntax errors
 
 ---
 
 ## Notes
 
 - The Bash prompt configuration is stored in `~/.bashrc`.
-- The prompt automatically displays the current Git branch.
-- `*` indicates modified or staged files.
-- `%` indicates untracked files.
-- The remote branch is displayed when one is configured.
-- Git aliases reduce the amount of typing needed for common Git commands.
-- `git gl` provides a compact graphical view of repository history.
+- The customized prompt displays Git information automatically.
+- The aliases reduce the amount of typing needed for common Git commands.
+- `gs` shows the repository status.
+- `gd` shows file changes.
+- `gg` displays Git history in a compact graphical format.
