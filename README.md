@@ -129,7 +129,7 @@ gs
 
 ### Screenshot
 
-![gs Git Status](screenshots/git-gs.png)
+![gs Git Status](screenshots/git-gs (1).png)
 
 ---
 
@@ -149,7 +149,7 @@ gd
 
 ### Screenshot
 
-![gd Git Diff](screenshots/git-gd.png)
+![gd Git Diff](screenshots/git-gd (1).png)
 
 ---
 
